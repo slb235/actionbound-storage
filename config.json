@@ -9,6 +9,7 @@
   "indexOnRequest": true,
   "authKeys": [
     "keyboardCat"
-  ]
+  ],
+  "worker": false
 }
 

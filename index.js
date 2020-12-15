@@ -42,6 +42,11 @@
   require('./http/socket')
   Server.run()
 
-  const Worker = require('./worker')
-  Worker.run()
+  if (config.worker) {
+    logger.info('init worker')
+    const Worker = require('./worker')
+    Worker.run()
+  } else {
+    logger.info('not init worker (disabled in config)')
+  }
 })()
