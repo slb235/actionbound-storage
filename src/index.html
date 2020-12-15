@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <style>
+      #root {
+        height: 100%;
+      }
+      .logo {
+        color: white;
+        font-size: 3em;
+        font-family: 'Share Tech Mono', monospace;
+        text-align: center;
+        background-image: radial-gradient(
+          ellipse 50% 35% at 50% 50%,
+          #002c30,
+          transparent
+        );
+        letter-spacing: 4px;
+        text-transform: uppercase;
+        color: #e2fdff;
+        text-shadow: 0 0 0.6rem #e2fdff, 0 0 1.5rem #63f3ff,
+          -0.2rem 0.1rem 1rem #63f3ff, 0.2rem 0.1rem 1rem #63f3ff,
+          0 -0.5rem 2rem #00e8fc, 0 0.5rem 3rem #00e8fc;
+        animation: shine 2s forwards, flicker 3s infinite;
+        position: relative;
+      }
+      @keyframes blink {
+        0%,
+        22%,
+        36%,
+        75% {
+          color: #e2fdff;
+          text-shadow: 0 0 0.6rem #e2fdff, 0 0 1.5rem #63f3ff,
+            -0.2rem 0.1rem 1rem #63f3ff, 0.2rem 0.1rem 1rem #63f3ff,
+            0 -0.5rem 2rem #00e8fc, 0 0.5rem 3rem #00e8fc;
+          opacity: 1;
+        }
+        28%,
+        33% {
+          color: #63f3ff;
+          text-shadow: none;
+          opacity: 1;
+        }
+        82%,
+        97% {
+          color: #00e8fc;
+          text-shadow: none;
+          opacity: 1;
+        }
+        50% {
+          opacity: 0;
+          text-shadow: none;
+        }
+      }
+
+      .flicker1 {
+        animation: shine 2s forwards, blink 3s 2s infinite;
+      }
+
+      .flicker2 {
+        animation: shine 2s forwards, blink 10s 1s infinite;
+      }
+
+      .flicker3 {
+        animation: shine 2s forwards, blink 9s 1.5s infinite;
+      }
+
+      .flicker4 {
+        animation: shine 2s forwards, blink 6s 2s infinite;
+      }
+      @keyframes shine {
+        0% {
+          color: #002c30;
+          text-shadow: none;
+        }
+        100% {
+          color: #e2fdff;
+          text-shadow: 0 0 0.6rem #e2fdff, 0 0 1.5rem #63f3ff,
+            -0.2rem 0.1rem 1rem #63f3ff, 0.2rem 0.1rem 1rem #63f3ff,
+            0 -0.5rem 2rem #00e8fc, 0 0.5rem 3rem #00e8fc;
+        }
+      }
+      @keyframes flicker {
+        from {
+          opacity: 1;
+        }
+        4% {
+          opacity: 0.9;
+        }
+        6% {
+          opacity: 0.85;
+        }
+        8% {
+          opacity: 0.95;
+        }
+        10% {
+          opacity: 0.9;
+        }
+        11% {
+          opacity: 0.922;
+        }
+        12% {
+          opacity: 0.9;
+        }
+        14% {
+          opacity: 0.95;
+        }
+        16% {
+          opacity: 0.98;
+        }
+        17% {
+          opacity: 0.9;
+        }
+        19% {
+          opacity: 0.93;
+        }
+        20% {
+          opacity: 0.99;
+        }
+        24% {
+          opacity: 1;
+        }
+        26% {
+          opacity: 0.94;
+        }
+        28% {
+          opacity: 0.98;
+        }
+        37% {
+          opacity: 0.93;
+        }
+        38% {
+          opacity: 0.5;
+        }
+        39% {
+          opacity: 0.96;
+        }
+        42% {
+          opacity: 1;
+        }
+        44% {
+          opacity: 0.97;
+        }
+        46% {
+          opacity: 0.94;
+        }
+        56% {
+          opacity: 0.9;
+        }
+        58% {
+          opacity: 0.9;
+        }
+        60% {
+          opacity: 0.99;
+        }
+        68% {
+          opacity: 1;
+        }
+        70% {
+          opacity: 0.9;
+        }
+        72% {
+          opacity: 0.95;
+        }
+        93% {
+          opacity: 0.93;
+        }
+        95% {
+          opacity: 0.95;
+        }
+        97% {
+          opacity: 0.93;
+        }
+        to {
+          opacity: 1;
+        }
+      }
+    </style>
+    <title>Actionbound Storage</title>
+    <link rel='icon' href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2016%2016'%3E%3Ctext%20x='0'%20y='14'%3E🤷‍♂️%3C/text%3E%3C/svg%3E" type='image/svg+xml' />
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap" rel="stylesheet"> 
+  </head>
+  <body>
+    <div id='root'></div>
+  </body>
+</html>

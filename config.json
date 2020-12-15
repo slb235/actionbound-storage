@@ -1,0 +1,14 @@
+{
+  "backends": [{
+    "id": "root",
+    "backend": "file",
+    "path": "/"
+    }
+  ],
+  "mongo": "mongodb://localhost:27017/storage?replicaSet=rs0",
+  "indexOnRequest": true,
+  "authKeys": [
+    "keyboardCat"
+  ]
+}
+
