@@ -70,6 +70,11 @@ class Server {
     // long timeout for long uploads
     this.http.setTimeout(24 * 3600 * 1000)
 
+    // health (public available without auth)
+    this.app.get('/health', (req, res) => {
+      res.end('good')
+    })
+
     // check for auth
     this.app.use((req, res, next) => {
       if (config.authKeys.includes(req.header('x-api-key'))) {
