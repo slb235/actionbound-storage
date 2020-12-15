@@ -1,7 +1,8 @@
 const winston = require('winston')
+const config = require('./config')
 
 const logger = winston.createLogger({
-  level: 'silly',
+  level: config.logLevel || 'silly',
   transports: [
     new winston.transports.Console({ format: winston.format.simple() })
   ]
