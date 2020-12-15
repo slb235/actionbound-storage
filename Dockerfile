@@ -11,4 +11,4 @@ COPY . .
 RUN npx webpack --mode=production
 
 EXPOSE 3000
-CMD node index.js
+ENTRYPOINT ["node", "index.js"]
