@@ -32,8 +32,10 @@
     logger.info('removed files no loger present in any backends')
 
     // cancel non resumeable jobs
-    const result = await db.collection('jobs').updateMany({ state: { $in: ['running', 'stoping', 'pausing', 'paused', 'resuming'] } }, { $set: { state: 'failedrestart' } })
-    logger.info('set previouly running jobs to failedrestart', result)
+    if (config.worker) {
+      const result = await db.collection('jobs').updateMany({ state: { $in: ['running', 'stoping', 'pausing', 'paused', 'resuming'] } }, { $set: { state: 'failedrestart' } })
+      logger.info('set previouly running jobs to failedrestart', result)
+    }
   }
 
   await cleanupAndInitialize()
