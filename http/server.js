@@ -6,6 +6,7 @@ const config = require('../config')
 const logger = require('../logger')
 const Storage = require('../storage')
 const { MethodNotAllowedError } = require('../errors')
+const { streamEnd } = require('../backend/shared')
 
 /*
   Api is quite simple:
@@ -21,18 +22,27 @@ const api = async (req, res, next) => {
     return next()
   }
 
-  let stream, fileInfo
+  let stream
+  let fileInfo
+  let streamError = false
   switch (req.method) {
     case 'GET':
       stream = await Storage.createReadStream(file)
+      stream.on('error', (err) => {
+        logger.error('readStream error', err)
+        streamError = true
+        res.status(404).end('Not found')
+      })
       fileInfo = await Storage.getFileInfo(file)
 
-      res.set({
-        'Content-Type': mime.lookup(file),
-        'Content-Length': fileInfo.size
-      })
+      if (!streamError) {
+        res.set({
+          'Content-Type': mime.lookup(file),
+          'Content-Length': fileInfo.size
+        })
+        stream.pipe(res)
+      }
 
-      stream.pipe(res)
       break
     case 'POST': {
       try {
