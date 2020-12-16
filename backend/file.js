@@ -82,7 +82,14 @@ class FileBackend {
 
   async _indexDirectory (folder, options) {
     const directoryPath = folder ? this._fullPath(folder) : this.basePath
-    const directory = await fs.opendir(directoryPath)
+    let directory
+    try {
+      directory = await fs.opendir(directoryPath)
+    } catch (err) {
+      logger.info(`cant open directory ${directory}. skipping`)
+      return
+    }
+
     logger.info(`indexing directory ${directoryPath}`)
     while (true) {
       if (this.indexShouldStop) {
