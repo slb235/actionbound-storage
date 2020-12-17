@@ -35,7 +35,7 @@ class S3Backend {
 
   async createReadStream (file, options) {
     const s3Params = this._params(file)
-    if (options.start && options.end) {
+    if (Number.isFinite(options.start) && Number.isFinite(options.end)) {
       s3Params.Range = `bytes=${options.start}-${options.end}`
     }
     return this.s3.getObject(s3Params).createReadStream()
