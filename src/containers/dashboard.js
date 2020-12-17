@@ -21,7 +21,7 @@ export default () => {
   const { data, get } = useWebsocket('dashboard')
 
   useEffect(() => {
-    const interval = setInterval(get, 5000)
+    const interval = setInterval(get, 120000)
     return () => clearInterval(interval)
   })
 
