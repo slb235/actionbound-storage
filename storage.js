@@ -99,6 +99,7 @@ class Storage {
         const backends = []
         for (const backend of this.backends) {
           if (await backend.exists(file)) {
+            await backend.indexFile(file)
             backends.push(backend)
           }
         }
@@ -126,11 +127,23 @@ class Storage {
     if (!backend) {
       throw new FileNotFoundError(file)
     }
-    return await backend.createReadStream(file)
+    return await backend.createReadStream(file, options)
   }
 
   async getFileInfo (file) {
-    return await files.findOne({ _id: file })
+    const fileEntry = await files.findOne({ _id: file })
+    if (fileEntry) {
+      return fileEntry
+    }
+
+    if (config.indexOnRequest) {
+      logger.silly('did not find in database, try finding it on backends')
+      for (const backend of this.backends) {
+        if (await backend.exists(file)) {
+          return await backend.indexFile(file)
+        }
+      }
+    }
   }
 
   async createWriteStream (file) {

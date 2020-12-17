@@ -36,10 +36,10 @@ class SFTPBackend {
     return (await this.client.exists(`/${file}`)) === '-'
   }
 
-  async createReadStream (file) {
+  async createReadStream (file, options) {
     const tmpFileName = `./tmp/tmp-${crypto.randomBytes(4).readUInt32LE(0)}`
     await this.client.fastGet(`/${file}`, tmpFileName)
-    const rs = fs.createReadStream(tmpFileName)
+    const rs = fs.createReadStream(tmpFileName, options)
     rs.on('end', () => fs.unlink(tmpFileName))
     return rs
   }

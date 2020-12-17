@@ -27,8 +27,16 @@ class MinioBackend {
     }
   }
 
-  async createReadStream (file) {
-    return await this.minio.getObject(this.bucket, file)
+  async createReadStream (file, options) {
+    logger.silly('minio createReadstream with options', options)
+    if (Number.isFinite(options.start) && Number.isFinite(options.end)) {
+      const length = options.end - options.start + 1
+      logger.silly(`calling getPartialObject from ${options.start} with ${length} bytes`)
+      return await this.minio.getPartialObject(this.bucket, file, options.start, length)
+    } else {
+      return await this.minio.getObject(this.bucket, file)
+    }
+
     /*
     return this.minio.getObject(this._params(file)).createReadStream()
     */

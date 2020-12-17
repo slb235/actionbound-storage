@@ -33,8 +33,12 @@ class S3Backend {
     }
   }
 
-  async createReadStream (file) {
-    return this.s3.getObject(this._params(file)).createReadStream()
+  async createReadStream (file, options) {
+    const s3Params = this._params(file)
+    if (options.start && options.end) {
+      s3Params.Range = `bytes=${options.start}-${options.end}`
+    }
+    return this.s3.getObject(s3Params).createReadStream()
   }
 
   async writeStream (file, stream) {

@@ -6,7 +6,6 @@ const config = require('../config')
 const logger = require('../logger')
 const Storage = require('../storage')
 const { MethodNotAllowedError } = require('../errors')
-const { streamEnd } = require('../backend/shared')
 
 /*
   Api is quite simple:
@@ -24,24 +23,54 @@ const api = async (req, res, next) => {
 
   let stream
   let fileInfo
-  let streamError = false
+  let range
+  let streamOptions = {}
   switch (req.method) {
     case 'GET':
-      stream = await Storage.createReadStream(file)
+      fileInfo = await Storage.getFileInfo(file)
+      if (!fileInfo) {
+        logger.silly(`${file} not found`)
+        res.status(404).end('Not found')
+      }
+
+      range = req.range(fileInfo.size)
+      if (range) {
+        if (range === -1 || range === -2) {
+          return res.status(400).end('Bad Request')
+        }
+        streamOptions = {
+          start: range[0].start,
+          end: range[0].end
+        }
+        logger.silly(`got range request ${range[0].start}-${range[0].end}`)
+      }
+
+      stream = await Storage.createReadStream(file, streamOptions)
       stream.on('error', (err) => {
         logger.error('readStream error', err)
-        streamError = true
         res.status(404).end('Not found')
       })
-      fileInfo = await Storage.getFileInfo(file)
-
-      if (!streamError) {
-        res.set({
-          'Content-Type': mime.lookup(file),
-          'Content-Length': fileInfo.size
-        })
-        stream.pipe(res)
-      }
+      stream.once('data', () => {
+        if (range) {
+          res.status(206).set({
+            'Content-Type': mime.lookup(file),
+            'Content-Range': `bytes ${range[0].start}-${range[0].end}/${fileInfo.size}`,
+            'Accept-Ranges': 'bytes'
+          })
+        } else {
+          res.status(200).set({
+            'Content-Type': mime.lookup(file),
+            'Content-Length': fileInfo.size,
+            'Accept-Ranges': 'bytes'
+          })
+        }
+      })
+      stream.on('data', (chunk) => {
+        res.write(chunk)
+      })
+      stream.on('end', () => {
+        res.end()
+      })
 
       break
     case 'POST': {
@@ -55,7 +84,6 @@ const api = async (req, res, next) => {
         } catch {
           logger.error('error unlinking', err)
         }
-
         res.status(400).end('aborted')
       }
       break
@@ -87,6 +115,9 @@ class Server {
 
     // check for auth
     this.app.use((req, res, next) => {
+      if (config.disableAuth) {
+        return next()
+      }
       if (config.authKeys.includes(req.header('x-api-key'))) {
         next()
       } else {

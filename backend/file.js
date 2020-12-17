@@ -31,8 +31,8 @@ class FileBackend {
     }
   }
 
-  async createReadStream (file) {
-    return fs.createReadStream(this._fullPath(file))
+  async createReadStream (file, options) {
+    return fs.createReadStream(this._fullPath(file), options)
   }
 
   async createWriteStream (file) {
