@@ -5,6 +5,7 @@ const mime = require('mime-types')
 const config = require('../config')
 const logger = require('../logger')
 const Storage = require('../storage')
+const crypto = require('crypto')
 const { MethodNotAllowedError } = require('../errors')
 
 /*
@@ -25,26 +26,33 @@ const api = async (req, res, next) => {
   let fileInfo
   let range
   let streamOptions = {}
+  let headers
   switch (req.method) {
     case 'GET':
       fileInfo = await Storage.getFileInfo(file)
       if (!fileInfo) {
         logger.silly(`${file} not found`)
         res.status(404).end('Not found')
+        return
+      }
+
+      headers = {
+        ETag: crypto.createHash('sha1').update(`${file}${fileInfo.size}`).digest('base64'),
+        'Content-Type': mime.lookup(file),
+        'Accept-Ranges': 'bytes'
       }
 
       range = req.range(fileInfo.size)
       if (range) {
-        if (range === -1 || range === -2) {
+        if (!Array.isArray(range) || range.length !== 1) {
           return res.status(400).end('Bad Request')
         }
         streamOptions = {
           start: range[0].start,
           end: range[0].end
         }
-        logger.silly(`got range request ${range[0].start}-${range[0].end}`)
+        logger.silly(`got range request ${streamOptions.start}-${streamOptions.end}`)
       }
-
       stream = await Storage.createReadStream(file, streamOptions)
       stream.on('error', (err) => {
         logger.error('readStream error', err)
@@ -53,25 +61,17 @@ const api = async (req, res, next) => {
       stream.once('data', () => {
         if (range) {
           res.status(206).set({
-            'Content-Type': mime.lookup(file),
-            'Content-Range': `bytes ${range[0].start}-${range[0].end}/${fileInfo.size}`,
-            'Accept-Ranges': 'bytes'
+            ...headers,
+            'Content-Range': `bytes ${streamOptions.start}-${streamOptions.end}/${fileInfo.size}`
           })
         } else {
           res.status(200).set({
-            'Content-Type': mime.lookup(file),
-            'Content-Length': fileInfo.size,
-            'Accept-Ranges': 'bytes'
+            ...headers,
+            'Content-Length': fileInfo.size
           })
         }
       })
-      stream.on('data', (chunk) => {
-        res.write(chunk)
-      })
-      stream.on('end', () => {
-        res.end()
-      })
-
+      stream.pipe(res)
       break
     case 'POST': {
       try {

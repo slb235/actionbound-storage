@@ -19,7 +19,6 @@ const loadBackends = async () => {
   const stats = await (await files.aggregate([{ $unwind: '$backends' }, { $group: { _id: '$backends', size: { $sum: '$size' }, files: { $sum: 1 } } }])).toArray()
   return docs.map((backend) => {
     const stat = stats.find((stat) => stat._id === backend._id)
-    console.log(stat)
     return {
       size: stat ? stat.size : 0,
       files: stat ? stat.files : 0,
