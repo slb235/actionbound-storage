@@ -44,6 +44,9 @@ export const useWebsocket = (topic, params = {}, deps = []) => {
     remove: (id) => {
       socket.emit('remove', topic, id)
     },
+    get: () => {
+      socket.emit('get', topic)
+    },
     data
   }
 }

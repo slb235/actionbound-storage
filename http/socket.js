@@ -12,7 +12,22 @@ const backends = db.collection('backends')
 const files = db.collection('files')
 
 const loadJobs = async () => await (await jobs.find().sort({ createdAt: -1 }).toArray())
-const loadBackends = async () => await (await backends.find().sort({ _id: -1 }).toArray())
+
+const loadBackends = async () => {
+  const docs = await (await backends.find().sort({ _id: -1 })).toArray()
+  // aggretagte some stats
+  const stats = await (await files.aggregate([{ $unwind: '$backends' }, { $group: { _id: '$backends', size: { $sum: '$size' }, files: { $sum: 1 } } }])).toArray()
+  return docs.map((backend) => {
+    const stat = stats.find((stat) => stat._id === backend._id)
+    console.log(stat)
+    return {
+      size: stat ? stat.size : 0,
+      files: stat ? stat.files : 0,
+      ...backend
+    }
+  })
+}
+
 const loadFiles = async (params) => {
   logger.silly('websock file request', params)
   const docs = await (
@@ -28,6 +43,26 @@ const loadFiles = async (params) => {
     total,
     docs
   }
+}
+const loadDashboardStats = async () => {
+  logger.silly('websocket dashboard request')
+  const total = await (
+    await files.aggregate([{ $group: { _id: 'total', files: { $sum: 1 }, size: { $sum: '$size' } } }])
+  ).toArray()
+  const years = await (
+    await files.aggregate([{ $group: { _id: { $year: '$mtime' }, files: { $sum: 1 }, size: { $sum: '$size' } } }, { $sort: { _id: -1 } }])
+  ).toArray()
+  const months = await (
+    await files.aggregate([{ $group: { _id: { $month: '$mtime' }, files: { $sum: 1 }, size: { $sum: '$size' } } }, { $sort: { _id: 1 } }])
+  ).toArray()
+  const days = await (
+    await files.aggregate([
+      { $match: { mtime: { $gt: new Date((new Date().getTime() - (14 * 24 * 60 * 60 * 1000))) } } },
+      { $group: { _id: { $dateToString: { date: '$mtime', format: '%Y-%m-%d' } }, files: { $sum: 1 }, size: { $sum: '$size' } } },
+      { $sort: { _id: -1 } }
+    ])
+  ).toArray()
+  return [total, years, months, days]
 }
 
 class Socket {
@@ -58,8 +93,10 @@ class Socket {
 
       socket.on('get', async (topic, params = {}) => {
         switch (topic) {
+          case 'dashboard':
+            socket.emit('result', topic, await loadDashboardStats())
+            break
           case 'jobs':
-            logger.silly('sending jobs as requested')
             socket.emit('result', topic, await loadJobs())
             break
           case 'backends':

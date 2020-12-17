@@ -2,6 +2,7 @@ import React from 'react'
 import { Table, Tag } from 'antd'
 import { useWebsocket } from '../utils'
 import moment from 'moment'
+import numeral from 'numeral'
 
 export default (props) => {
   const { data } = useWebsocket('backends')
@@ -19,9 +20,16 @@ export default (props) => {
       render: (value) => <Tag>{value.toUpperCase()}</Tag>
     },
     {
-      title: 'URL',
-      dataIndex: 'url',
-      key: 'url'
+      title: 'Files',
+      dataIndex: 'files',
+      key: 'files',
+      render: (value) => numeral(value).format()
+    },
+    {
+      title: 'Size',
+      dataIndex: 'size',
+      key: 'size',
+      render: (value) => numeral(value).format('0 b')
     },
     {
       title: 'Created',

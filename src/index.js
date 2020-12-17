@@ -13,6 +13,7 @@ import {
 import Jobs from './containers/jobs'
 import Backends from './containers/backends'
 import Files from './containers/files'
+import Dashboard from './containers/dashboard'
 
 import 'antd/dist/antd.css'
 
@@ -61,7 +62,7 @@ const App = (props) => {
               <Jobs />
             </Route>
             <Route path='/'>
-              <p>dashboard</p>
+              <Dashboard />
             </Route>
           </Switch>
         </div>
