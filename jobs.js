@@ -54,24 +54,25 @@ const move = async (job, { tick }) => {
   const { src, dst } = job
   const query = { $and: [{ backends: src }, { backends: { $ne: dst } }] }
   let progress = 0
-  logger.info(`starting copy job from ${src} to ${dst}`)
+  logger.info(`move copy job from ${src} to ${dst}`)
   let stopped = false
 
   const moveNextFile = async () => {
     const todo = await files.countDocuments(query)
-    logger.silly(`copy job found ${todo} files to copy`)
+    logger.silly(`move job found ${todo} files to copy`)
     if (todo === 0) {
       return
     }
-    const file = await files.findOne(query)
-    logger.silly('copy nextfile', file)
+    const files = await files.find(query).sort({ size: -1 }).limit(1)
+    const file = files[0]
+    logger.silly('move nextfile', file)
     const stream = await Storage.getBackend(src).createReadStream(file._id)
     await Storage.getBackend(dst).writeStream(file._id, stream)
     await Storage.getBackend(dst).indexFile(file._id)
     await Storage.getBackend(src).unlink(file._id)
     await files.updateOne({ _id: file._id }, { $pull: { backends: src } })
     progress++
-    logger.silly(`copy progress: ${progress}/${todo + progress}`)
+    logger.silly(`move progress: ${progress}/${todo + progress}`)
     stopped = !await tick(file)
     if (!stopped) {
       await moveNextFile()
