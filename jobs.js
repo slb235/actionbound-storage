@@ -63,7 +63,7 @@ const move = async (job, { tick }) => {
     if (todo === 0) {
       return
     }
-    const [ file ] = await files.find(query).sort({ size: -1 }).limit(1)
+    const [ file ] = await (await files.find(query).sort({ size: -1 }).limit(1)).toArray()
     logger.silly('move nextfile', file)
     const stream = await Storage.getBackend(src).createReadStream(file._id)
     await Storage.getBackend(dst).writeStream(file._id, stream)
