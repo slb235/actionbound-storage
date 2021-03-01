@@ -32,6 +32,7 @@ class FileBackend {
   }
 
   async createReadStream (file, options) {
+    await fs.access(this._fullPath(file), fs.constants.F_OK)
     return fs.createReadStream(this._fullPath(file), options)
   }
 

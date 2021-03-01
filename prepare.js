@@ -3,9 +3,19 @@
   const Connection = require('./connection')
   const db = await Connection.connectToMongo()
 
-  await db.dropCollection('backends')
-  await db.dropCollection('files')
-  await db.dropCollection('jobs')
+  const dropIfExists = async (collection) => {
+    try {
+      await db.dropCollection(collection)
+    }
+    catch (error) {
+      console.log(`collection ${collection} does not exist.`)
+    }
+  }
+
+
+  await dropIfExists('backends')
+  await dropIfExists('files')
+  await dropIfExists('jobs')
 
   await db.createCollection('backends')
   await db.createCollection('files')

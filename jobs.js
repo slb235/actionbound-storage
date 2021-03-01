@@ -65,7 +65,16 @@ const move = async (job, { tick }) => {
     }
     const [ file ] = await (await files.find(query).sort({ size: -1 }).limit(1)).toArray()
     logger.silly('move nextfile', file)
-    const stream = await Storage.getBackend(src).createReadStream(file._id)
+    let stream
+    try {
+      stream = await Storage.getBackend(src).createReadStream(file._id)
+    }
+    catch (err) {
+      logger.error('cant open file anymore')
+      await files.updateOne({ _id: file._id }, { $pull: { backends: src } })
+      await files.deleteOne({ _id: file._id, backends: { $size: 0 } })
+      return await moveNextFile()
+    }
     await Storage.getBackend(dst).writeStream(file._id, stream)
     await Storage.getBackend(dst).indexFile(file._id)
     await Storage.getBackend(src).unlink(file._id)

@@ -6,6 +6,7 @@ class Connection {
     if (this.db) {
       return this.db
     }
+    console.log(`connecting to ${this.url}`)
     this.db = await (await MongoClient.connect(this.url, this.options)).db()
     return this.db
   }
