@@ -28,6 +28,21 @@ const api = async (req, res, next) => {
   let streamOptions = {}
   let headers
   switch (req.method) {
+    case 'HEAD':
+      fileInfo = await Storage.getFileInfo(file)
+      if (!fileInfo) {
+        logger.silly(`${file} not found`)
+        res.status(404).end('Not found')
+        return
+      }
+      headers = {
+        ETag: crypto.createHash('sha1').update(`${file}${fileInfo.size}`).digest('base64'),
+        'Content-Type': mime.lookup(file),
+        'Accept-Ranges': 'bytes',
+        'Content-Length': fileInfo.size
+      }
+      res.status(200).set(headers).end()
+      break
     case 'GET':
       fileInfo = await Storage.getFileInfo(file)
       if (!fileInfo) {
